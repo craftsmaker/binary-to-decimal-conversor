@@ -1,10 +1,38 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
+import {useSpring, animated} from "react-spring";
 import "./styles.css";
 
 function App() {
   const [binary,setBinary] = useState("");
   const [decimal,setDecimal] = useState("");
   const [message,setMessage] = useState("");
+
+  const [aValue,set,stop] = useSpring(() =>({
+    position: "relative",
+    left: 0,
+    config: {
+      mass: 1,
+      friction: 12,
+      tension: 180,
+      precision: 30
+    }
+  }))
+
+  const [messageAnimation,setMSGA,stopMSGA] = useSpring(() => ({
+    config: {duration: 5000},
+    opacity: 1
+  }))
+  
+  useEffect(() => {
+    console.log(message);
+    if(message){
+      setMSGA({opacity: 0});
+      stopMSGA()
+    }else{
+      setMSGA({opacity: 1});
+      stopMSGA()
+    }
+  },[message])
 
   function handleBinaryChange({key,type}){
     
@@ -41,11 +69,15 @@ function App() {
 
       if (inputedValue === "0" || inputedValue === "1"){
         setBinary(prevValue => prevValue + inputedValue);
-
-       
         
         setDecimal(convertBinaryToDecimal(binary + inputedValue));
         }else{
+          set({to: async (next,cancel) => {
+            await next({left: 10})
+            await next({left: -10})
+            await next({left: 0})
+          }});
+          stop()
           setMessage("Please put simply 0 or 1");
         }
     }
@@ -55,17 +87,21 @@ function App() {
     <div className="App">
       <form id="app-form">
         <div>
-          <div>
-            <label>Binary:</label>
-            <label>Decimal:</label>
+          <div style={{display: "flex",flex:1,flexDirection: "column",justifyContent: "center"}}>
+            <div>
+              <animated.div id="labels" style={aValue}>
+                <label>Binary:</label>
+                <label>Decimal:</label>   
+              </animated.div>
+              <animated.div id="inputs" style={aValue}>
+                <input value={binary} onKeyDown={handleBinaryChange} onChange={handleBinaryChange}/>
+                <input value={decimal} readOnly/>
+              </animated.div>
+            </div>
+            <div style={{ display: "flex",justifyContent: "flex-end"}}>
+              <animated.p style={messageAnimation}>{message}</animated.p>
+            </div>
           </div>
-          <div>
-            <input value={binary} onKeyDown={handleBinaryChange} onChange={handleBinaryChange}/>
-            <input value={decimal} readOnly/>
-          </div>
-        </div>
-        <div>
-          <p>{message}</p>
         </div>
       </form>
     </div>
