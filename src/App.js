@@ -89,12 +89,12 @@ function App() {
         <div>
           <div style={{display: "flex",flex:1,flexDirection: "column",justifyContent: "center"}}>
             <div>
-              <animated.div id="labels" style={aValue}>
+              <animated.div id="labels" style={{...aValue, justifyContent: "center",alignItems: "center",height: "100%"}}>
                 <label>Binary:</label>
                 <label>Decimal:</label>   
               </animated.div>
               <animated.div id="inputs" style={aValue}>
-                <input value={binary} onKeyDown={handleBinaryChange} onChange={handleBinaryChange}/>
+                <input value={binary} onKeyDown={handleBinaryChange} onChange={handleBinaryChange} placeholder="Put your binary here"/>
                 <input value={decimal} readOnly/>
               </animated.div>
             </div>
