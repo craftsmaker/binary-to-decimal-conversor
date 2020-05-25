@@ -5,7 +5,8 @@ import "./styles.css";
 function App() {
   const [binary,setBinary] = useState("");
   const [decimal,setDecimal] = useState("");
-  const [message,setMessage] = useState("");
+  const message = "Please put simply 0 or 1";
+  const navigationType = performance.getEntriesByType("navigation")[0].type;
 
   const [aValue,set,stop] = useSpring(() =>({
     position: "relative",
@@ -20,19 +21,19 @@ function App() {
 
   const [messageAnimation,setMSGA,stopMSGA] = useSpring(() => ({
     config: {duration: 5000},
-    opacity: 1
+    opacity: 0
   }))
   
+  const [translate,setTranslate,stopTranslate] = useSpring(() => ({from:{position: "relative",left: "0%"}}));
+
   useEffect(() => {
-    console.log(message);
-    if(message){
-      setMSGA({opacity: 0});
-      stopMSGA()
-    }else{
-      setMSGA({opacity: 1});
-      stopMSGA()
+    console.log("The navigation type changed: and is now:",window.performance.navigation.type)
+    if (navigationType === "navigate"){
+      setTranslate({from:{left: "70%"},left: "0%",reset:true});
+      stopTranslate()
     }
-  },[message])
+  },[navigationType])
+ 
 
   function handleBinaryChange({key,type}){
     
@@ -71,21 +72,26 @@ function App() {
         setBinary(prevValue => prevValue + inputedValue);
         
         setDecimal(convertBinaryToDecimal(binary + inputedValue));
-        }else{
-          set({to: async (next,cancel) => {
-            await next({left: 10})
-            await next({left: -10})
-            await next({left: 0})
-          }});
-          stop()
-          setMessage("Please put simply 0 or 1");
-        }
+      }else{
+        set({to: async (next,cancel) => {
+          await next({left: 10})
+          await next({left: -10})
+          await next({left: 0})
+        }});
+        stop()
+        if (messageAnimation.opacity === 1)
+          setMSGA({opacity: 0})
+        else
+          setMSGA({opacity: 1});
+        stopMSGA()
+        
+      }
     }
   }
 
   return (
     <div className="App">
-      <form id="app-form">
+      <animated.form id="app-form" style={translate}>
         <div>
           <div style={{display: "flex",flex:1,flexDirection: "column",justifyContent: "center"}}>
             <div>
@@ -103,7 +109,7 @@ function App() {
             </div>
           </div>
         </div>
-      </form>
+      </animated.form>
     </div>
   );
 }
