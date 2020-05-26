@@ -20,9 +20,11 @@ function App() {
   }))
 
   const [messageAnimation,setMSGA,stopMSGA] = useSpring(() => ({
-    config: {duration: 5000},
+    config: {duration: 2000},
     opacity: 0
   }))
+
+  console.log(messageAnimation)
   
   const [translate,setTranslate,stopTranslate] = useSpring(() => ({from:{position: "relative",left: "0%"}}));
 
@@ -32,7 +34,7 @@ function App() {
       setTranslate({from:{left: "70%"},left: "0%",reset:true});
       stopTranslate()
     }
-  },[navigationType])
+  },[navigationType,setTranslate,stopTranslate])
  
 
   function handleBinaryChange({key,type}){
@@ -72,6 +74,9 @@ function App() {
         setBinary(prevValue => prevValue + inputedValue);
         
         setDecimal(convertBinaryToDecimal(binary + inputedValue));
+      }
+      else if(key === "Alt" || key === "Control"){
+        return;
       }else{
         set({to: async (next,cancel) => {
           await next({left: 10})
@@ -79,12 +84,16 @@ function App() {
           await next({left: 0})
         }});
         stop()
-        if (messageAnimation.opacity === 1)
-          setMSGA({opacity: 0})
-        else
-          setMSGA({opacity: 1});
-        stopMSGA()
-        
+        console.log("This is from message:",messageAnimation.opacity)
+        let {value} = messageAnimation.opacity;
+        if (value === 1 && messageAnimation.opacity.done){
+          setMSGA({from: {opacity: 1},opacity: 0,reset: true});
+          stopMSGA();
+        }
+        if(value === 0 && messageAnimation.opacity.done){
+          setMSGA({from: {opacity: 0},opacity: 1,reset: true})
+          stopMSGA(); 
+        }
       }
     }
   }
@@ -104,7 +113,7 @@ function App() {
                 <input value={decimal} readOnly/>
               </animated.div>
             </div>
-            <div style={{ display: "flex",justifyContent: "flex-end"}}>
+            <div style={{ display: "flex",justifyContent: "center"}}>
               <animated.p style={messageAnimation}>{message}</animated.p>
             </div>
           </div>
